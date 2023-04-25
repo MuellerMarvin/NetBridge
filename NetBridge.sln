@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetBridge", "NetBridge\NetBridge.csproj", "{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9F5D8809-2F39-48D4-9355-EFF8E1C2FC8C}
+	EndGlobalSection
+EndGlobal

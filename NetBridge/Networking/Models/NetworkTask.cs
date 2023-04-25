@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace NetBridge.Networking.Models
 {
+    [Serializable]
     public struct NetworkTask
     {
         public int Id { get; set; }

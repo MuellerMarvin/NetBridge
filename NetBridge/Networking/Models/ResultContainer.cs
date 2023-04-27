@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace NetBridge.Networking.Models
 {
-    internal class ResultContainer
+    internal class ResultContainer<ResultType>
     {
-        [AllowNull]
-        public Object Result = null;
+        public Guid TaskGuid { get; set; }
+        public ResultType ResultPayload { get; set; }
 
-        public ResultContainer(object result)
+        public ResultContainer(Guid taskGuid, ResultType resultPayload)
         {
-            this.Result = result;
+            this.TaskGuid = taskGuid;
+            this.ResultPayload = resultPayload;
         }
     }
 }

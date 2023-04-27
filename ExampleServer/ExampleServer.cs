@@ -34,7 +34,7 @@ namespace ExampleServer
 
 
             // Create a new server with the configuration.
-            Server<CalculatorTask> server = new(serverConfig, logger);
+            Server<CalculatorTask, int> server = new(serverConfig, logger);
 
             // Start the server.
             Task serverTask = Task.Run(server.Run);

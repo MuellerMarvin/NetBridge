@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 
 namespace NetBridge.Networking.Core
 {
-    public class Client<PayloadType>
+    public class Client<PayloadType, ResultType>
     {
         public Logger Logger { get; set; }
 
@@ -26,7 +26,7 @@ namespace NetBridge.Networking.Core
         /// <summary>
         /// Gets executed every time  a task is received from the server, and returns the result to be sent back to the server.
         /// </summary>
-        public Func<NetworkTask<PayloadType>, object> TaskHandler { get; set; }
+        public Func<NetworkTask<PayloadType>, ResultType> TaskHandler { get; set; }
 
 
         /// <summary>
@@ -83,10 +83,10 @@ namespace NetBridge.Networking.Core
                 Logger.Log("Received task. - " + task.Guid, LogLevel.Info);
 
                 // Do work.
-                object result = TaskHandler(task);
+                ResultType result = TaskHandler(task);
 
                 // Send result back to server.
-                UtilityFunctions.SendObject(this.TcpClient.GetStream(), new ResultContainer(result));
+                UtilityFunctions.SendObject(this.TcpClient.GetStream(), new ResultContainer<ResultType>(task.Guid, result));
                 Logger.Log("Sent result.", LogLevel.Info);
             }
         }

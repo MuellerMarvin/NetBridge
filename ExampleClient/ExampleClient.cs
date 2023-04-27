@@ -32,7 +32,7 @@ namespace ExampleClient
             while (true)
             {
                 // Create a new client with the configuration.
-                Client<CalculatorTask> client = new(clientConfig, logger)
+                Client<CalculatorTask, int> client = new(clientConfig, logger)
                 {
                     // Decide what to do when a task is received.
                     TaskHandler = DoTask
@@ -44,7 +44,7 @@ namespace ExampleClient
             }
         }
 
-        static object DoTask(NetworkTask<CalculatorTask> netTask)
+        static int DoTask(NetworkTask<CalculatorTask> netTask)
         {
             // Do the task.
             CalculatorTask calcTask = netTask.Payload;

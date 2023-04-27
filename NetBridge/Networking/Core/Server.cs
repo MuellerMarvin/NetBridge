@@ -5,6 +5,7 @@ using NetBridge.Logging;
 using NetBridge.Networking.Models;
 using NetBridge.Networking.Models.Configuration;
 using System.Diagnostics.CodeAnalysis;
+using System.Xml.XPath;
 
 namespace NetBridge.Networking.Core
 {
@@ -15,7 +16,7 @@ namespace NetBridge.Networking.Core
         public object Result { get; set; }
     }
 
-    public class Server<PayloadType>
+    public class Server<PayloadType, ResultType>
     {
         public Logger Logger { get; set; }
 
@@ -127,7 +128,7 @@ namespace NetBridge.Networking.Core
         /// <param name="clientStore"></param>
         /// <param name="task"></param>
         /// <returns></returns>
-        private async Task<object> ExecuteTask(ClientStore clientStore, NetworkTask<PayloadType> task)
+        private async Task<ResultType> ExecuteTask(ClientStore clientStore, NetworkTask<PayloadType> task)
         {
             // Set the client as busy.
             clientStore.IsBusy = true;
@@ -138,10 +139,10 @@ namespace NetBridge.Networking.Core
             Logger.Info("A task has been sent for execution. - " + task.Guid.ToString());
 
             // Wait for the result.
-            ResultContainer resultContainer = UtilityFunctions.ReceiveObject<ResultContainer>(networkStream);
+            ResultContainer<ResultType> resultContainer = UtilityFunctions.ReceiveObject<ResultContainer<ResultType>>(networkStream);
             Logger.Info("Received result from client.");
 
-            return resultContainer.Result;
+            return resultContainer.ResultPayload;
         }
 
         private async Task RemoveStaleConnectionsAsync()

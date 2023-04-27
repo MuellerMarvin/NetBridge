@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -30,7 +31,7 @@ namespace NetBridge.Logging
     public class Logger
     {
         public LogConfig LogConfig { get; private set; }
-        private StreamWriter _writer;
+        private readonly StreamWriter _writer;
 
         public Logger(LogConfig logConfig)
         {
@@ -40,6 +41,11 @@ namespace NetBridge.Logging
             if(LogConfig.FileLogLevel > 0 && (LogConfig.LogFilePath != null))
             {
                 _writer = new StreamWriter(LogConfig.LogFilePath, false);
+            }
+            else
+            {
+                // If there won't be any file logging, set the writer to null.
+                _writer = StreamWriter.Null;
             }
         }
 
@@ -57,7 +63,7 @@ namespace NetBridge.Logging
                     Console.ForegroundColor = ConsoleColor.DarkCyan; // Info messages are dark cyan.
                     break;
                 case LogLevel.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow; // Warning messages are yellow.
+                    Console.ForegroundColor = ConsoleColor.DarkYellow; // Warning messages are yellow.
                     break;
                 case LogLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red; // Error messages are red.
@@ -86,6 +92,31 @@ namespace NetBridge.Logging
                 _writer.WriteLine(logMessage);
                 _writer.Flush();
             }
+        }
+
+        public void Info(string message)
+        {
+            this.Log(message, LogLevel.Info);
+        }
+
+        public void Debug(string message)
+        {
+            this.Log(message, LogLevel.Debug);
+        }
+
+        public void Warning(string message)
+        {
+            this.Log(message, LogLevel.Warning);
+        }
+
+        public void Error(string message)
+        {
+            this.Log(message, LogLevel.Error);
+        }
+
+        public void Fatal(string message)
+        {
+            this.Log(message, LogLevel.Fatal);
         }
     }
 }

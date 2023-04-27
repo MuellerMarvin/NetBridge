@@ -5,6 +5,10 @@ VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetBridge", "NetBridge\NetBridge.csproj", "{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleServer", "ExampleServer\ExampleServer.csproj", "{3D0332C2-59D7-4718-8871-E48C53088826}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleClient", "ExampleClient\ExampleClient.csproj", "{F82FAA02-7B33-42AF-8309-C843573B8455}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BA973A7-6A76-4AB7-8A4E-6925B870FF33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D0332C2-59D7-4718-8871-E48C53088826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D0332C2-59D7-4718-8871-E48C53088826}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D0332C2-59D7-4718-8871-E48C53088826}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D0332C2-59D7-4718-8871-E48C53088826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F82FAA02-7B33-42AF-8309-C843573B8455}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F82FAA02-7B33-42AF-8309-C843573B8455}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F82FAA02-7B33-42AF-8309-C843573B8455}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F82FAA02-7B33-42AF-8309-C843573B8455}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

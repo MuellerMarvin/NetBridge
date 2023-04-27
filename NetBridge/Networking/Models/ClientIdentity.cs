@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NetBridge.Networking
+namespace NetBridge.Networking.Models
 {
     [Serializable]
     public struct ClientIdentity
@@ -13,7 +13,7 @@ namespace NetBridge.Networking
 
         public ClientIdentity(Guid guid)
         {
-            this.GUID = guid;
+            GUID = guid;
         }
     }
 }

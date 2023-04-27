@@ -11,15 +11,17 @@ namespace NetBridge.Networking.Serialization
 {
     internal static class JsonByteArraySerializer
     {
-        internal static byte[] SerializeToJsonBytes(object obj)
+        internal static byte[] SerializeToJsonBytes<T>(T source)
         {
-            string jsonData = JsonSerializer.Serialize(obj);
+            string jsonData = JsonSerializer.Serialize<T>(source);
+            Console.WriteLine(jsonData);
             return System.Text.Encoding.UTF8.GetBytes(jsonData);
         }
 
         internal static T DeserializeFromJsonBytes<T>(byte[] data)
         {
             string jsonData = System.Text.Encoding.UTF8.GetString(data);
+            Console.WriteLine(jsonData);
             return JsonSerializer.Deserialize<T>(jsonData);
         }
     }

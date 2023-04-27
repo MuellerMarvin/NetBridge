@@ -4,7 +4,6 @@ using NetBridge.Networking.Core;
 using NetBridge.Networking.Models;
 using NetBridge.Networking.Models.Configuration;
 using NetBridge.Logging;
-
 using ExampleServer.SharedModels;
 
 namespace ExampleClient
@@ -32,12 +31,12 @@ namespace ExampleClient
             // Restart the client if the server disconnects.
             while (true)
             {
-                    // Create a new client with the configuration.
-                    Client client = new(clientConfig, logger)
-                    {
-                        // Decide what to do when a task is received.
-                        TaskHandler = DoTask<CalculatorTask>
-                    };
+                // Create a new client with the configuration.
+                Client<CalculatorTask> client = new(clientConfig, logger)
+                {
+                    // Decide what to do when a task is received.
+                    TaskHandler = DoTask
+                };
 
                     // Start the client.
                     Task clientTask = Task.Run(client.Run);
@@ -45,9 +44,10 @@ namespace ExampleClient
             }
         }
 
-        static object DoTask (CalculatorTask task)
+        static object DoTask(NetworkTask<CalculatorTask> netTask)
         {
-            CalculatorTask calcTask = task as CalculatorTask;
+            // Do the task.
+            CalculatorTask calcTask = netTask.Payload;
             int result = 0;
             switch (calcTask.Operation)
             {
@@ -64,8 +64,10 @@ namespace ExampleClient
                     result = calcTask.Operands[0] / calcTask.Operands[1];
                     break;
                 default:
-                    break;
+                    throw new ArgumentException("invalid CalculatorOperation in DoTask Method.");
             }
+
+            // Return the result.
             return result;
         }
     }

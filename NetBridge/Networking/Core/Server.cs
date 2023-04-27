@@ -15,7 +15,7 @@ namespace NetBridge.Networking.Core
         public object Result { get; set; }
     }
 
-    public class Server
+    public class Server<PayloadType>
     {
         public Logger Logger { get; set; }
 
@@ -27,7 +27,7 @@ namespace NetBridge.Networking.Core
 
         private readonly List<ClientStore> Clients = new();
 
-        private readonly Queue<NetworkTask> TaskQueue = new();
+        private readonly Queue<NetworkTask<PayloadType>> TaskQueue = new();
 
 
 
@@ -85,7 +85,7 @@ namespace NetBridge.Networking.Core
                 }
 
                 // Get the first task in the queue.
-                NetworkTask netTask = TaskQueue.Dequeue();
+                NetworkTask<PayloadType> netTask = TaskQueue.Dequeue();
 
                 ClientStore clientStore = FindAvailableClient(this.Clients);
                 clientStore.IsBusy = true;
@@ -107,7 +107,7 @@ namespace NetBridge.Networking.Core
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        public async Task<object> DoTask(NetworkTask task)
+        public async Task<object> DoTask(NetworkTask<PayloadType> task)
         {
             // Hand out a GUUID
             task.Guid = Guid.NewGuid();
@@ -127,7 +127,7 @@ namespace NetBridge.Networking.Core
         /// <param name="clientStore"></param>
         /// <param name="task"></param>
         /// <returns></returns>
-        private async Task<object> ExecuteTask(ClientStore clientStore, INetworkTask task)
+        private async Task<object> ExecuteTask(ClientStore clientStore, NetworkTask<PayloadType> task)
         {
             // Set the client as busy.
             clientStore.IsBusy = true;

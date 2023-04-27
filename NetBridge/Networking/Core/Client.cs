@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 
 namespace NetBridge.Networking.Core
 {
-    public class Client
+    public class Client<PayloadType>
     {
         public Logger Logger { get; set; }
 
@@ -26,19 +26,17 @@ namespace NetBridge.Networking.Core
         /// <summary>
         /// Gets executed every time  a task is received from the server, and returns the result to be sent back to the server.
         /// </summary>
-        public Func<NetworkTask<T>, object> TaskHandler { get; set; }
+        public Func<NetworkTask<PayloadType>, object> TaskHandler { get; set; }
 
-        public Type TaskType { get; private set; }
 
         /// <summary>
         /// Create a new client instance with no logging.
         /// </summary>
         /// <param name="config"></param>
-        public Client(ClientConfig config, Type taskType)
+        public Client(ClientConfig config)
         {
             this.TcpClient = new TcpClient();
             this.Config = config;
-            this.TaskType = taskType;
 
             this.Logger = new Logger(new LogConfig()
             {
@@ -52,12 +50,11 @@ namespace NetBridge.Networking.Core
         /// </summary>
         /// <param name="config"></param>
         /// <param name="logger"></param>
-        public Client(ClientConfig config, Type taskType, Logger logger)
+        public Client(ClientConfig config, Logger logger)
         {
             this.TcpClient = new TcpClient();
             this.Config = config;
             this.Logger = logger;
-            this.TaskType = taskType;
         }
 
         public async Task Run()
@@ -82,7 +79,7 @@ namespace NetBridge.Networking.Core
             while (true)
             {
                 // Receive task from server.
-                NetworkTask task = ReceiveTask(); // Receive Task from server
+                NetworkTask<PayloadType> task = ReceiveTask(); // Receive Task from server
                 Logger.Log("Received task. - " + task.Guid, LogLevel.Info);
 
                 // Do work.
@@ -94,9 +91,9 @@ namespace NetBridge.Networking.Core
             }
         }
 
-        private NetworkTask ReceiveTask()
+        private NetworkTask<PayloadType> ReceiveTask()
         {
-            NetworkTask task = UtilityFunctions.ReceiveObject<NetworkTask>(TcpClient.GetStream());
+            NetworkTask<PayloadType> task = UtilityFunctions.ReceiveObject<NetworkTask<PayloadType>>(TcpClient.GetStream());
             return task;
         }
     }

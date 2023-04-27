@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -8,19 +9,18 @@ using System.Threading.Tasks;
 namespace NetBridge.Networking.Models
 {
     [Serializable]
-    public class NetworkTask
+    public class NetworkTask<PayloadType>
     {
         public Guid Guid { get; set; }
-
-        public T Payload { get; set; }
+        public PayloadType Payload { get; set; }
 
         public NetworkTask() { }
 
         [JsonConstructor]
-        protected NetworkTask(Guid guid, payload)
+        public NetworkTask(Guid guid, PayloadType payload)
         {
             Guid = guid;
-            Payload 
+            this.Payload = payload;
         }
     }
 }

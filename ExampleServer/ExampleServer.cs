@@ -4,6 +4,7 @@ using NetBridge.Networking.Core;
 using NetBridge.Networking.Models;
 using NetBridge.Networking.Models.Configuration;
 using NetBridge.Logging;
+
 using ExampleServer.SharedModels;
 
 namespace ExampleServer
@@ -33,16 +34,12 @@ namespace ExampleServer
 
 
             // Create a new server with the configuration.
-            Server server = new(serverConfig, logger);
+            Server<CalculatorTask> server = new(serverConfig, logger);
 
             // Start the server.
             Task serverTask = Task.Run(server.Run);
 
-            NetworkTask netTask = new CalculatorTask()
-            {
-                Operation = CalculatorOperation.Add,
-                Operands = new int[] { 1, 2, 3 }
-            };
+            NetworkTask<CalculatorTask> netTask = new NetworkTask<CalculatorTask>(Guid.NewGuid(), new CalculatorTask(CalculatorOperation.Add, new int[] { 1, 2, 3 }));
 
             Object resultObj = server.DoTask(netTask);
             int result = (int)resultObj;

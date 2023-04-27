@@ -46,7 +46,7 @@ namespace NetBridge.Networking
             }
         }
 
-        internal static void SendObject(NetworkStream stream, object data)
+        internal static void SendObject<T>(NetworkStream stream, T data)
         {
             SendData(stream, JsonByteArraySerializer.SerializeToJsonBytes(data));
         }

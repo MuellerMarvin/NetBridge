@@ -41,8 +41,7 @@ namespace ExampleServer
 
             NetworkTask<CalculatorTask> netTask = new NetworkTask<CalculatorTask>(Guid.NewGuid(), new CalculatorTask(CalculatorOperation.Add, new int[] { 1, 2, 3 }));
 
-            Object resultObj = server.DoTask(netTask);
-            int result = (int)resultObj;
+            int result = server.DoTask(netTask).Result;
 
             Console.WriteLine("Result: {0}", result);
 

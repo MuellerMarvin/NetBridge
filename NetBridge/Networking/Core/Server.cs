@@ -3,19 +3,11 @@ using System.Net.Sockets;
 
 using NetBridge.Logging;
 using NetBridge.Networking.Models;
+using NetBridge.Networking.Models.Events;
 using NetBridge.Networking.Models.Configuration;
-using System.Diagnostics.CodeAnalysis;
-using System.Xml.XPath;
 
 namespace NetBridge.Networking.Core
 {
-    internal class TaskCompleteEvent : EventArgs
-    {
-        public Guid TaskId { get; set; }
-        [AllowNull]
-        public object Result { get; set; }
-    }
-
     public class Server<PayloadType, ResultType>
     {
         public Logger Logger { get; set; }
@@ -30,6 +22,10 @@ namespace NetBridge.Networking.Core
 
         private readonly Queue<NetworkTask<PayloadType>> TaskQueue = new();
 
+
+        #region Event Handlers
+        public event EventHandler<TaskCompleteEvent> OnTaskComplete;
+        #endregion
 
 
         /// <summary>
@@ -76,7 +72,7 @@ namespace NetBridge.Networking.Core
             Logger.Info("Server is running.");
 
             // Complete tasks... forever.
-            while(true)
+            while (true)
             {
                 // If there are no tasks in the queue or no clients connected, wait.
                 if (TaskQueue.Count == 0 || Clients.Count == 0)
@@ -93,10 +89,8 @@ namespace NetBridge.Networking.Core
 
                 Task task = Task.Run(async () =>
                 {
-                    object result = await ExecuteTask(clientStore, netTask);
+                    await ClientCompleteTask(clientStore, netTask);
                     clientStore.IsBusy = false;
-
-                    return new object();
                 });
             }
         }
@@ -108,7 +102,7 @@ namespace NetBridge.Networking.Core
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        public async Task<object> DoTask(NetworkTask<PayloadType> task)
+        public async Task<ResultType> DoTask(NetworkTask<PayloadType> task)
         {
             // Hand out a GUUID
             task.Guid = Guid.NewGuid();
@@ -118,7 +112,10 @@ namespace NetBridge.Networking.Core
             // Wait for the task to complete.
             while (true)
             {
-                // TODO: Add a trigger to continue.
+                // Wait for OnTaskCompleted
+
+
+                // Check if it's the right task GUID.
             }
         }
 
@@ -128,11 +125,8 @@ namespace NetBridge.Networking.Core
         /// <param name="clientStore"></param>
         /// <param name="task"></param>
         /// <returns></returns>
-        private async Task<ResultType> ExecuteTask(ClientStore clientStore, NetworkTask<PayloadType> task)
+        private async Task ClientCompleteTask(ClientStore clientStore, NetworkTask<PayloadType> task)
         {
-            // Set the client as busy.
-            clientStore.IsBusy = true;
-
             // Send the task to the client.
             NetworkStream networkStream = clientStore.TcpClient.GetStream();
             UtilityFunctions.SendObject(networkStream, task);
@@ -140,9 +134,11 @@ namespace NetBridge.Networking.Core
 
             // Wait for the result.
             ResultContainer<ResultType> resultContainer = UtilityFunctions.ReceiveObject<ResultContainer<ResultType>>(networkStream);
-            Logger.Info("Received result from client.");
 
-            return resultContainer.ResultPayload;
+            // Return the result.
+            RaiseOnTaskComplete(task.Guid, resultContainer.ResultPayload);
+
+            Logger.Info("Received result from client.");
         }
 
         private async Task RemoveStaleConnectionsAsync()
@@ -200,5 +196,9 @@ namespace NetBridge.Networking.Core
             return null;
         }
 
+        protected virtual void RaiseOnTaskComplete(Guid taskId, object result)
+        {
+            OnTaskComplete?.Invoke(this, new TaskCompleteEvent { TaskId = taskId, Result = result });
+        }
     }
 }

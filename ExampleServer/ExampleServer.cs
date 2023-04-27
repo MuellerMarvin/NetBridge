@@ -11,6 +11,8 @@ namespace ExampleServer
 {
     internal class ExampleServer
     {
+        static Server<CalculatorTask, int> Server;
+
         static void Main()
         {
             // Create a configuration for your server.
@@ -34,18 +36,60 @@ namespace ExampleServer
 
 
             // Create a new server with the configuration.
-            Server<CalculatorTask, int> server = new(serverConfig, logger);
+            Server = new(serverConfig, logger);
 
             // Start the server.
-            Task serverTask = Task.Run(server.Run);
+            Task serverTask = Task.Run(Server.Run);
 
-            NetworkTask<CalculatorTask> netTask = new NetworkTask<CalculatorTask>(Guid.NewGuid(), new CalculatorTask(CalculatorOperation.Add, new int[] { 1, 2, 3 }));
+            
 
-            int result = server.DoTask(netTask).Result;
 
-            Console.WriteLine("Result: {0}", result);
+            int[] results = GetMultipleResults().Result;
+
+            foreach (int result in results)
+            {
+                Console.WriteLine("Result: " + result);
+            }
 
             serverTask.Wait();
+        }
+
+        static async Task<int[]> GetMultipleResults()
+        {
+            // Create a list of networked tasks to run.
+            NetworkTask<CalculatorTask>[] netTasks = new NetworkTask<CalculatorTask>[] {
+                new NetworkTask<CalculatorTask>
+                {
+                    Payload = new CalculatorTask(CalculatorOperation.Add, new int[] { 1, 2, 3 })
+                },
+                new NetworkTask<CalculatorTask>
+                {
+                    Payload = new CalculatorTask(CalculatorOperation.Multiply, new int[] { 1, 2, 3 })
+                },
+                new NetworkTask<CalculatorTask>
+                {
+                    Payload = new CalculatorTask(CalculatorOperation.Subtract, new int[] { 1, 2, 3 })
+                }
+            };
+
+            // Run all tasks in parallel.
+            List<Task<int>> tasks = new List<Task<int>>();
+            foreach (NetworkTask<CalculatorTask> netTask in netTasks)
+            {
+                tasks.Add(Server.DoTask(netTask));
+            }
+
+            // Wait for the tasks to finish.
+            Task.WaitAll(tasks.ToArray());
+
+            // Get the results.
+            int[] results = new int[tasks.Count];
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                results[i] = tasks[i].Result;
+            }
+
+            return results;
         }
     }
 }

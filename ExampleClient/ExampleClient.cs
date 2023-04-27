@@ -55,7 +55,7 @@ namespace ExampleClient
                     result = calcTask.Operands.Sum();
                     break;
                 case CalculatorOperation.Subtract:
-                    result = calcTask.Operands[0] - calcTask.Operands[1];
+                    result = calcTask.Operands.Skip(1).Aggregate(calcTask.Operands[0], (x, y) => x - y);
                     break;
                 case CalculatorOperation.Multiply:
                     result = calcTask.Operands.Aggregate((a, b) => a * b);

@@ -22,6 +22,8 @@ namespace NetBridge.Networking.Core
 
         private readonly Queue<NetworkTask<PayloadType>> TaskQueue = new();
 
+        private Dictionary<Guid, ResultType> TaskResults = new();
+
 
         #region Event Handlers
         public event EventHandler<TaskCompleteEvent> OnTaskComplete;
@@ -55,6 +57,35 @@ namespace NetBridge.Networking.Core
             TcpListener = new TcpListener(Config.ServerIP, Config.ServerPort);
 
             this.Logger = logger;
+        }
+
+        private ResultType WaitForTaskCompletion(Guid guid)
+        {
+            // Create a TaskCompletionSource and store it locally.
+            var tcs = new TaskCompletionSource<ResultType>();
+
+            // Define the event handler.
+            EventHandler<TaskCompleteEvent> myEventHandler = null;
+            myEventHandler = (sender, args) =>
+            {
+                if (args.TaskId == guid)
+                {
+                    // Unsubscribe from the event.
+                    OnTaskComplete -= myEventHandler;
+
+                    // Set the result of the TaskCompletionSource to the result of the task.
+                    tcs.TrySetResult((ResultType)args.Result);
+                }
+            };
+
+            // Subscribe to the event.
+            OnTaskComplete += myEventHandler;
+
+            // Wait for the event to be fired.
+            var result = tcs.Task.Result;
+
+            // Return the result of the task.
+            return result;
         }
 
         public async Task Run()
@@ -104,19 +135,16 @@ namespace NetBridge.Networking.Core
         /// <returns></returns>
         public async Task<ResultType> DoTask(NetworkTask<PayloadType> task)
         {
-            // Hand out a GUUID
+            // Hand out a new GUUID
             task.Guid = Guid.NewGuid();
 
             // Queue the task.
             TaskQueue.Enqueue(task);
+
             // Wait for the task to complete.
-            while (true)
-            {
-                // Wait for OnTaskCompleted
+            ResultType result = WaitForTaskCompletion(task.Guid);
 
-
-                // Check if it's the right task GUID.
-            }
+            return result;
         }
 
         /// <summary>

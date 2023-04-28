@@ -139,8 +139,8 @@ namespace NetBridge.Networking.Core
             task.Guid = Guid.NewGuid();
 
             // Queue the task.
-            TaskQueue.Enqueue(task);
             Logger.Info("Added task. - " + task.Guid);
+            TaskQueue.Enqueue(task);
 
             // Wait for the task to complete.
             ResultType result = WaitForTaskCompletion(task.Guid);

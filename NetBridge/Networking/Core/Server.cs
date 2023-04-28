@@ -140,6 +140,7 @@ namespace NetBridge.Networking.Core
 
             // Queue the task.
             TaskQueue.Enqueue(task);
+            Logger.Info("Added task. - " + task.Guid);
 
             // Wait for the task to complete.
             ResultType result = WaitForTaskCompletion(task.Guid);
@@ -158,7 +159,7 @@ namespace NetBridge.Networking.Core
             // Send the task to the client.
             NetworkStream networkStream = clientStore.TcpClient.GetStream();
             UtilityFunctions.SendObject(networkStream, task);
-            Logger.Info("A task has been sent for execution. - " + task.Guid.ToString());
+            Logger.Info("Executing task remotely. - " + task.Guid);
 
             // Wait for the result.
             ResultContainer<ResultType> resultContainer = UtilityFunctions.ReceiveObject<ResultContainer<ResultType>>(networkStream);
@@ -166,7 +167,7 @@ namespace NetBridge.Networking.Core
             // Return the result.
             RaiseOnTaskComplete(task.Guid, resultContainer.ResultPayload);
 
-            Logger.Info("Received result from client.");
+            Logger.Info("Completed task. - " + task.Guid);
         }
 
         private async Task RemoveStaleConnectionsAsync()

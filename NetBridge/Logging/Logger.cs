@@ -83,7 +83,6 @@ namespace NetBridge.Logging
             if (logLevel >= LogConfig.ConsoleLogLevel)
             {
                 Console.WriteLine(logMessage);
-                Console.ResetColor();
             }
 
             // Write the log to the file.

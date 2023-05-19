@@ -59,7 +59,7 @@ namespace NetBridge.Networking.Core
             this.Logger = logger;
         }
 
-        private ResultType WaitForTaskCompletion(Guid guid)
+        private Task<ResultType> WaitForTaskCompletion(Guid guid)
         {
             // Create a TaskCompletionSource and store it locally.
             var tcs = new TaskCompletionSource<ResultType>();
@@ -81,12 +81,10 @@ namespace NetBridge.Networking.Core
             // Subscribe to the event.
             OnTaskComplete += myEventHandler;
 
-            // Wait for the event to be fired.
-            var result = tcs.Task.Result;
-
-            // Return the result of the task.
-            return result;
+            // Return the task that represents the network operation.
+            return tcs.Task;
         }
+
 
         public async Task Run()
         {
@@ -112,17 +110,27 @@ namespace NetBridge.Networking.Core
                     continue;
                 }
 
-                // Get the first task in the queue.
-                NetworkTask<PayloadType> netTask = TaskQueue.Dequeue();
+                List<ClientStore> availableClients = this.Clients.Where(client => !client.IsBusy).ToList();
 
-                ClientStore clientStore = FindAvailableClient(this.Clients);
-                clientStore.IsBusy = true;
-
-                Task task = Task.Run(async () =>
+                foreach (ClientStore clientStore in availableClients)
                 {
-                    await ClientCompleteTask(clientStore, netTask);
-                    clientStore.IsBusy = false;
-                });
+                    // If there are no tasks left, break.
+                    if (TaskQueue.Count == 0)
+                    {
+                        break;
+                    }
+
+                    // Get the first task in the queue.
+                    NetworkTask<PayloadType> netTask = TaskQueue.Dequeue();
+
+                    clientStore.IsBusy = true;
+
+                    Task task = Task.Run(() =>
+                    {
+                        ClientCompleteTask(clientStore, netTask);
+                        clientStore.IsBusy = false;
+                    });
+                }
             }
         }
 
@@ -143,10 +151,11 @@ namespace NetBridge.Networking.Core
             TaskQueue.Enqueue(task);
 
             // Wait for the task to complete.
-            ResultType result = WaitForTaskCompletion(task.Guid);
+            ResultType result = await WaitForTaskCompletion(task.Guid);
 
             return result;
         }
+
 
         /// <summary>
         /// Executes a task on the provided client and returns the result.
@@ -154,15 +163,15 @@ namespace NetBridge.Networking.Core
         /// <param name="clientStore"></param>
         /// <param name="task"></param>
         /// <returns></returns>
-        private async Task ClientCompleteTask(ClientStore clientStore, NetworkTask<PayloadType> task)
+        private void ClientCompleteTask(ClientStore clientStore, NetworkTask<PayloadType> task)
         {
             // Send the task to the client.
             NetworkStream networkStream = clientStore.TcpClient.GetStream();
-            UtilityFunctions.SendObject(networkStream, task);
+            UtilityFunctions.SendObject(networkStream, task, this.Logger);
             Logger.Info("Executing task remotely. - " + task.Guid);
 
             // Wait for the result.
-            ResultContainer<ResultType> resultContainer = UtilityFunctions.ReceiveObject<ResultContainer<ResultType>>(networkStream);
+            ResultContainer<ResultType> resultContainer = UtilityFunctions.ReceiveObject<ResultContainer<ResultType>>(networkStream, this.Logger);
 
             // Return the result.
             RaiseOnTaskComplete(task.Guid, resultContainer.ResultPayload);
@@ -211,18 +220,6 @@ namespace NetBridge.Networking.Core
 
                 Logger.Log("A new client has connected. - " + identity.GUID.ToString(), LogLevel.Info);
             }
-        }
-
-        private static ClientStore? FindAvailableClient(List<ClientStore> clients)
-        {
-            foreach (ClientStore client in clients)
-            {
-                if (!client.IsBusy)
-                {
-                    return client;
-                }
-            }
-            return null;
         }
 
         protected virtual void RaiseOnTaskComplete(Guid taskId, object result)

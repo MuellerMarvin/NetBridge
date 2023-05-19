@@ -1,4 +1,5 @@
-﻿using NetBridge.Networking.Models;
+﻿using NetBridge.Logging;
+using NetBridge.Networking.Models;
 using NetBridge.Networking.Serialization;
 using System;
 using System.Collections.Generic;
@@ -36,24 +37,30 @@ namespace NetBridge.Networking
         {
             byte[] dataSize = BitConverter.GetBytes(data.Length);
             stream.Write(dataSize, 0, dataSize.Length);
+            stream.Flush();
 
             int bytesSent = 0;
             while (bytesSent < data.Length)
             {
                 int bufferSize = Math.Min(BufferSize, data.Length - bytesSent);
                 stream.Write(data, bytesSent, bufferSize);
+                stream.Flush();
                 bytesSent += bufferSize;
             }
         }
 
-        internal static void SendObject<T>(NetworkStream stream, T data)
+        internal static void SendObject<T>(NetworkStream stream, T data, Logger logger)
         {
+            byte[] jsonData = JsonByteArraySerializer.SerializeToJsonBytes(data);
+            logger.Debug("JSON Data:\n" + System.Text.Encoding.UTF8.GetString(jsonData));
             SendData(stream, JsonByteArraySerializer.SerializeToJsonBytes(data));
         }
 
-        internal static T ReceiveObject<T>(NetworkStream stream)
+        internal static T ReceiveObject<T>(NetworkStream stream, Logger logger)
         {
-            return JsonByteArraySerializer.DeserializeFromJsonBytes<T>(UtilityFunctions.ReceiveData(stream));
+            byte[] jsonData = UtilityFunctions.ReceiveData(stream);
+            logger.Debug("JSON Data:\n" + System.Text.Encoding.UTF8.GetString(jsonData));
+            return JsonByteArraySerializer.DeserializeFromJsonBytes<T>(jsonData);
         }
     }
 }

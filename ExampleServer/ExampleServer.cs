@@ -74,20 +74,15 @@ namespace ExampleServer
 
             // Run all tasks in parallel.
             List<Task<int>> tasks = new List<Task<int>>();
+
+            // Add all tasks to the list.
             foreach (NetworkTask<CalculatorTask> netTask in netTasks)
             {
                 tasks.Add(Server.DoTask(netTask));
             }
 
-            // Wait for the tasks to finish.
-            Task.WaitAll(tasks.ToArray());
-
-            // Get the results.
-            int[] results = new int[tasks.Count];
-            for (int i = 0; i < tasks.Count; i++)
-            {
-                results[i] = tasks[i].Result;
-            }
+            // Wait for all tasks to finish.
+            int[] results = await Task.WhenAll(tasks);
 
             return results;
         }

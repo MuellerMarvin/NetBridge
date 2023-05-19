@@ -86,14 +86,14 @@ namespace NetBridge.Networking.Core
                 ResultType result = TaskHandler(task);
 
                 // Send result back to server.
-                UtilityFunctions.SendObject(this.TcpClient.GetStream(), new ResultContainer<ResultType>(task.Guid, result));
+                UtilityFunctions.SendObject(this.TcpClient.GetStream(), new ResultContainer<ResultType>(task.Guid, result), this.Logger);
                 Logger.Log("Sent result.", LogLevel.Info);
             }
         }
 
         private NetworkTask<PayloadType> ReceiveTask()
         {
-            NetworkTask<PayloadType> task = UtilityFunctions.ReceiveObject<NetworkTask<PayloadType>>(TcpClient.GetStream());
+            NetworkTask<PayloadType> task = UtilityFunctions.ReceiveObject<NetworkTask<PayloadType>>(TcpClient.GetStream(), this.Logger);
             return task;
         }
     }
